@@ -74,6 +74,7 @@
 			var hablando = false;
 
 			function loop(interno) {
+				speechSynthesis.cancel();
 				if(callar) {
 					callar = false;
 					hablando = false;
@@ -81,7 +82,6 @@
 				}
 				if(hablando && !interno) return;
 				hablando = true;
-				speechSynthesis.cancel();
 				msg = new SpeechSynthesisUtterance();
 				var text = getLine();
 				msg.lang = 'es-ES';
