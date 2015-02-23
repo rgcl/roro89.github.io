@@ -23,14 +23,22 @@
 		#page img {
 			width: 100%;
 		}
-		#page button {
+		#page .bottom {
 			position: fixed;
 			bottom: 0;
 			left: 0;
 			right: 0;
 			width: 100%;
+		}
+		#page button {
 			font-size: 20px;
 			padding: 10px;
+		}
+		#despertar {
+			width: 80%;
+		}
+		#callar {
+			width: 18%;
 		}
 	</style>
 </head>
@@ -40,7 +48,10 @@
 		<h1>Político automático: El Discurso</h1>
 		<div id="discurso">
 		</div>
-		<button id="despertar">Click si el hablante se queda callado</button>
+		<div class="bottom">
+			<button id="despertar">Continuar hablando</button>
+			<button id="callar">Callar</button>
+		</div>
 	</div>
 	<script>
 		var a = ["Queridos compañeros ", "Por otra parte,y dados los condicionamientos actuales ", "Asimismo, ", "Sin embargo no hemos de olvidar que ", "De igual manera, ", "La práctica de la vida cotidiana prueba que ", "No es indispensable argumentar el peso y la significación de estos problemas ya que ", "Las experiencias ricas y diversas muestran que ", "El afán de organización, pero sobre todo ", "Los superiores principios ideológicos, condicionan que ", "Incluso, bien pudiéramos atrevernos a sugerir que ", "Es obvio señalar que ", "Pero pecaríamos de insinceros si soslayásemos que ", "Por último, y como definitivo elemento esclarecedor, cabe añadir que "];
@@ -59,43 +70,48 @@
 
 		if('speechSynthesis' in window) {
 
-			function play() {
-				(function loop() {
+			var callar = false;
+			var hablando = false;
+
+			function loop(interno) {
+				if(callar) {
+					callar = false;
+					hablando = false;
+					return;
+				}
+				if(hablando && !interno) return;
+				hablando = true;
+				speechSynthesis.cancel();
+				msg = new SpeechSynthesisUtterance();
+				var text = getLine();
+				msg.lang = 'es-ES';
+				msg.text = text;
+				var line = document.createElement('p');
+				line.textContent = text;
+				discursoNode.appendChild(line);
+				window.scrollTo(0,document.body.scrollHeight);
+				msg.addEventListener('end', function() {
 					speechSynthesis.cancel();
-					msg = new SpeechSynthesisUtterance();
-					var text = getLine();
-					console.log(text);
-					msg.text = text;
-					var line = document.createElement('p');
-					line.textContent = text;
-					discursoNode.appendChild(line);
-					window.scrollTo(0,document.body.scrollHeight);
-					msg.lang = 'es-ES';
-					msg.addEventListener('end', function() {
-						speechSynthesis.cancel();
-						loop();
-					});
-					msg.onresume = function() { console.log('onresume') };
-					msg.onpause = function() { console.log('onpause') };
-					msg.onboundary = function() { console.log('onboundary') };
-					msg.onmark = function() { console.log('onmark') };
-					msg.onerror = function(e) {
-						console.log('error');
-						console.log(e);
-					}
-					speechSynthesis.speak(msg);
-				})();
-			}
+					if(!callar) loop(true);
+				});
+				speechSynthesis.speak(msg);
+			};
 
 			document.getElementById('despertar').onclick = function(e) {
 				e.preventDefault();
 				speechSynthesis.cancel();
+				loop();
+			}
+			document.getElementById('callar').onclick = function(e) {
+				e.preventDefault();
+				callar = true;
+				speechSynthesis.cancel();
 			}
 
-			play();
+			loop();
 
 		} else {
-			alert('Tu navegador no soporte la sintetización de voz... prueba con Google Chrome');
+			alert('Tu navegador no soporta la sintetización de voz... prueba con Google Chrome');
 		}
 
 	</script>
