@@ -90,8 +90,9 @@
 				line.textContent = text;
 				discursoNode.appendChild(line);
 				window.scrollTo(0,document.body.scrollHeight);
-				msg.addEventListener('end', function() {
+				msg.addEventListener('end', function(time) {
 					speechSynthesis.cancel();
+					console.log(text, time);
 					if(!callar) loop(true);
 				});
 				speechSynthesis.speak(msg);
